@@ -58,14 +58,14 @@ namespace Spaetzel.FeedDA
 
     public class Enclosure
     {
-        public string Url { get; set; }
+        public Uri Url { get; set; }
         public int Length { get; set; }
         public string Type { get; set; }
 
         public XElement GetXElement()
         {
             return new XElement("enclosure",
-                new XAttribute("url", Url),
+                new XAttribute("url", Url == null ? "" : Url.ToString() ),
                 new XAttribute("length", Length),
                 new XAttribute("type", Type)
                 );

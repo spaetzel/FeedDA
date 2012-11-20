@@ -32,18 +32,64 @@ namespace Spaetzel.FeedDA
 
         public static List<Outline> ParseOpml(XDocument opmlDoc)
         {
-            var outlines = from item in opmlDoc.Descendants("outline")
-                           select new Outline()
+            List<Outline> outlines = new List<Outline>();
+
+            foreach (var item in opmlDoc.Descendants("outline"))
+            {
+                outlines.AddRange(ParseOutline(item));
+            }
+
+          
+            return outlines.ToList();
+        }
+
+        private static IEnumerable<Outline> ParseOutline(XElement item)
+        {
+            List<Outline> output = new List<Outline>();
+
+            foreach (var subItem in item.Descendants("outline"))
+            {
+                output.AddRange(ParseOutline(subItem));
+            }
+
+            if (item.Attribute("xmlUrl") != null)
+            {
+                Outline newOutline = new Outline()
                            {
                                Title = GetAttributeValue(item.Attribute("title")),
                                Text = GetAttributeValue(item.Attribute("text")),
-                               Type = GetAttributeValue(item.Attribute("type")),
-                               XmlUrl = GetAttributeValue(item.Attribute("xmlUrl")),
-                               HtmlUrl = GetAttributeValue(item.Attribute("htmlUrl"))
-
+                               Type = GetAttributeValue(item.Attribute("type"))
                            };
 
-            return outlines.ToList();
+                try
+                {
+                    newOutline.XmlUrl = new Uri(GetAttributeValue(item.Attribute("xmlUrl")));
+                }
+                catch (UriFormatException)
+                {
+                }
+
+                try
+                {
+                    newOutline.HtmlUrl = new Uri(GetAttributeValue(item.Attribute("htmlUrl")));
+                }
+                catch (UriFormatException)
+                {
+                    newOutline.HtmlUrl = newOutline.XmlUrl;
+                }
+
+                if (  ( newOutline.XmlUrl != null && newOutline.XmlUrl.ToString().Length > 0 ) || (  newOutline.HtmlUrl != null && newOutline.HtmlUrl.ToString().Length > 0 ) )
+                {
+                    output.Add(newOutline);
+                }
+                else
+                {
+                    // Didn't get a good html or xml value, don't both adding
+                }
+            }
+
+            return output;
+    
         }
 
         public static string GetAttributeValue(XAttribute attribute)

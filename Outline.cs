@@ -11,8 +11,8 @@ namespace Spaetzel.FeedDA
         public string Text { get; set; }
         public string Title { get; set; }
         public string Type { get; set; }
-        public string XmlUrl { get; set; }
-        public string HtmlUrl { get; set; }
+        public Uri XmlUrl { get; set; }
+        public Uri HtmlUrl { get; set; }
         public List<Outline> Descendants { get; set; }
 
         public XElement GetXElement()
